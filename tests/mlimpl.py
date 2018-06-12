@@ -14,11 +14,11 @@ def lsreg(x, y):
 # set w to random weights
 # change g by derivative of the cost function with respect to w
 # if weight change is small, break
-def logreg(x, y, alpha=0.01, brk=0.00001, max_iter=10000):
+def logreg(x, y, eta=0.01, brk=0.00001, max_iter=10000):
     w = np.random.rand(x.shape[1], y.shape[1])
     for i in range(max_iter):
         h = 1 / (1 + np.exp(-np.dot(x,w)))
-        g = alpha * np.dot(x.T, y-h) / x.shape[0]
+        g = eta * np.dot(x.T, y-h) / x.shape[0]
         w = w + g
         if np.sum(g**2) < brk:
             break
@@ -27,7 +27,7 @@ def logreg(x, y, alpha=0.01, brk=0.00001, max_iter=10000):
 
 
 #------------------- instance begin -------------------
-# implementation of knn
+# k nearest neighbors
 # for each point
 #     find k closest points
 #     assign the most frequent class of the k points
@@ -40,7 +40,7 @@ def knn(x, y, k):
 
 
 #------------------- bayesian begin -------------------
-# implementation of gaussian naive bayes
+# gaussian naive bayes
 # given features predict class based on probability
 # find mean and variance of each attribute given class
 # assume normal and use to get probability
@@ -51,7 +51,7 @@ def gnb(x,y):
     p = np.array([np.sum(y==labels[i])/y.shape[0] for i in range(labels.shape[0])])
     return [labels, u[:,None], v[:,None], p]
 
-# implementation of gaussin naive bayes prediction
+# gaussian naive bayes prediction
 # calculate the highest possible class
 #      use normal prob for p(x|c)
 #      multiple together for each sample
@@ -59,13 +59,11 @@ def gnb_predict(x,prior):
     labels,u,v,p = prior
     px = np.exp(-(x-u)**2 / (2*v)) / np.sqrt(2*np.pi*v)
     return labels[np.argmax(np.prod(px,axis=2).T * p, axis=1)]
-
-
 #-------------------  bayesian end  -------------------
 
 
 #------------------- clustering begin -------------------
-# implementation of kmeanspp
+# kmeans++
 # choose random point as 1st centroid
 # for next k-1 points
 #     give each point prob = min_dist / total_dist
@@ -78,12 +76,12 @@ def kmeanspp(x,k):
         centroids = np.vstack([centroids, x[index]])
     return centroids
 
-# implementation of kmeans prediction
+# kmeans prediction
 # given k centroids tell the closest of x
 def kmeans_predict(x,centroids):
     return np.argmin(np.sum((centroids - x[:,None])**2, axis=2), axis=1)
 
-# implementation of kmeans
+# kmeans
 # given k centroids
 # assign each point the closest centroid
 # move centroid to mean of all points assigned to it
@@ -98,3 +96,22 @@ def kmeans(x,k):
         centroids = change
     return centroids
 #-------------------  clustering end  -------------------
+
+#-------------------  support vector machines begin -------------------
+# support vector machine
+# cost = max(0, 1 - y*x*w)
+# dc/dw = -x'*y
+def svm(x,y,eta=0.01,brk=0.00001,max_iter=10000):
+    if y.ndim != 2:
+        y = y.reshape(y.shape[0],1)
+    w = np.random.rand(x.shape[1], y.shape[1])
+    for i in range(max_iter):
+        h = np.dot(x,w)*y
+        g = eta * np.dot(x.T, y*(h<1)) / x.shape[0]
+        w = w + g
+        if np.sum(g**2) < brk:
+            break
+    return w
+
+def svm_pred(x,w):
+    return 2*(np.dot(x,w)>0)-1

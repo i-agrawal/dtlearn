@@ -7,8 +7,8 @@ import mlimpl as ml
 if __name__ == "__main__":
     # load data
     data = np.loadtxt(open("data/iris.data", "rb"), delimiter=",")
-    x = data[:, :data.shape[1]-1]
-    y = data[:, data.shape[1]-1].astype(int)
+    x = data[:,:-1]
+    y = data[:,-1].astype(int)
 
     # find the best k
     best = 0

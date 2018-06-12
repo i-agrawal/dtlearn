@@ -1,5 +1,6 @@
 # python-ml
 this is just me implementing machine learning algorithms in python using numpy  
+all implementations are in the tests/mlimpl.py for convenience
 
 all data used for testing purposes is not mine and not yours so to distribute  
 any data found in this repository please follow the proper license guidelines  

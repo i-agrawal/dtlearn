@@ -2,7 +2,7 @@
 from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
-import mlimpl as ml
+import mlpy
 
 if __name__ == "__main__":
     # load data
@@ -10,7 +10,7 @@ if __name__ == "__main__":
     x = data[:,:-1]
     y = data[:,-1]
 
-    # gaussian naive bayes to check if someone is a social drinker
-    prior = ml.gnb(x,y)
-    pred = ml.gnb_predict(x,prior)
+    # gaussian naive bayes to check iris plant class
+    prior = mlpy.gnb(x,y)
+    pred = mlpy.gnb_predict(x,prior)
     print("accuracy = %f" % (np.sum(pred==y)/y.shape[0]))

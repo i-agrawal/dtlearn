@@ -2,7 +2,7 @@
 from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
-import mlimpl as ml
+import mlpy
 
 if __name__ == "__main__":
     # load data
@@ -11,5 +11,5 @@ if __name__ == "__main__":
     x[:,1:] = data[:,:-1]
     y = 2*(data[:,-1]>0)-1
 
-    w = ml.svm(x,y)
-    print(np.sum((ml.svm_pred(x,w)==y)) / y.shape[0])
+    w = mlpy.svm(x,y)
+    print(np.sum((mlpy.svm_pred(x,w)==y)) / y.shape[0])

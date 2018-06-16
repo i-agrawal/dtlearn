@@ -9,6 +9,7 @@ import utility as util
 # assume normal and use to get probability
 def gnb(x,y):
     x = util.sanitize(x)
+    y = y[:,None]
     labels = np.unique(y)
     u = np.array([np.mean(x[np.where(y==labels[i])],axis=0) for i in range(labels.shape[0])])
     v = np.array([np.var(x[np.where(y==labels[i])],axis=0) for i in range(labels.shape[0])])

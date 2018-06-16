@@ -9,7 +9,7 @@ import utility as util
 #     assign the most frequent class of the k points
 def knn(x, y, k):
     x = util.sanitize(x)
-    y = y[:,None]
+    y = y.ravel()
     dist = np.sum((x - x[:,None])**2, axis=2)
     part = np.argpartition(dist, k+1)[:,:k+1]
     votes = y[np.array([np.delete(part[i], np.where(part[i]==i)) for i in range(x.shape[0])])]

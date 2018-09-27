@@ -38,7 +38,7 @@ class KNN(Model):
         """
         dists = X[:, np.newaxis] - self.X[np.newaxis]
         dists = np.sum(dists**2, axis=2)
-        nearest = np.argpartition(dists, k)[:,:k]
+        nearest = np.argpartition(dists, k)[:, :k]
         return self.handle(self.y[nearest])
 
     @staticmethod

@@ -18,6 +18,19 @@ def test_gaussian():
     print('gaussian:', accuracy)
 
 
+def test_bernoulli():
+    chess = np.load('data/chess.npy')
+    X = chess[:, :-1]
+    y = chess[:, -1]
+
+    model = naive.Bernoulli()
+    model.train(X, y)
+    h = model.predict(X)
+
+    accuracy = model.score(y, h)
+    print('bernoulli:', accuracy)
+
+
 def test_linear():
     boston = datasets.load_boston()
     X = boston.data
@@ -65,7 +78,7 @@ def test_knn_classifier():
     model = instance.KNN('classifier')
     model.train(X, y)
     h = model.predict(X, 3)
-    
+
     accuracy = model.score(y, h)
     print('knn classifier:', accuracy)
 
@@ -85,6 +98,7 @@ def test_knn_regressor():
 
 if __name__ == '__main__':
     test_gaussian()
+    test_bernoulli()
     test_linear()
     test_logistic()
     test_kmeans()

@@ -55,3 +55,47 @@ class Gaussian(Model):
         calculates the number of correct predictions over total predictions
         """
         return fraction_correct(y, h)
+
+
+class Bernoulli(Model):
+    def __init__(self):
+        """
+        bernoulli naive bayes model
+
+        :type labels: np.ndarray
+        :desc labels: possible classes [k x 1]
+
+        :type priors: np.ndarray
+        :desc priors: appearance rate of feature per class [k x n]
+
+        :type p: np.ndarray
+        :desc p: appearance rate of each class [k x 1]
+        """
+
+    def train(self, X, y):
+        """
+        find the appearance rate of each class and each feature given the class
+        """
+        self.labels = np.unique(y)
+        groups = [X[y == label] for label in self.labels]
+        self.priors = np.array([np.sum(group, axis=0) / len(group) for group in groups])
+        self.p = np.array([len(group) / len(y) for group in groups])
+
+    def predict(self, X):
+        """
+        given the appearance rate of a feature for each class and
+        the appearance rate of each class predict the most probable
+        class for each sample in X
+        """
+        X = X[:, np.newaxis]
+        priors = self.priors[np.newaxis]
+
+        prob = X * (2*priors-1) + (1-priors)
+        prob = np.prod(prob, axis=2) * self.p
+        return self.labels[np.argmax(prob, axis=1)]
+
+    def score(self, y, h):
+        """
+        calculates the number of correct predictions over total predictions
+        """
+        return fraction_correct(y, h)

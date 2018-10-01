@@ -29,9 +29,9 @@ def sigmoid(x):
 
 def fraction_correct(y, h):
     """
-    calculates the number of correct predictions over total predictions
+    calculates the fraction of correct predictions
     """
-    return np.sum(y == h) / len(y)
+    return np.mean(y == h)
 
 
 def coef_determination(y, h):
@@ -43,3 +43,42 @@ def coef_determination(y, h):
     dist = np.sum((y - h)**2)
     variance = np.sum((y - np.mean(y))**2)
     return 1.0 - dist / variance
+
+
+class Table:
+    def __init__(self, *columns, precision=5):
+        """
+        helpful for printing nice looking table
+
+        :type columns: List[str]
+        :desc columns: list of column names
+
+        :type rows: List[Tuple]
+        :desc rows: list of table rows from add
+
+        :type width: List[int]
+        :desc width: the width of each column
+        """
+        self.columns = columns
+        self.__rows = []
+        self.__width = [len(x) for x in self.columns]
+        self.precision = precision / 10.0
+
+    def add(self, *args):
+        assert len(args) == len(self.columns)
+        data = ['{1:{0}f}'.format(self.precision, x) if isinstance(x,float) else str(x) for x in args]
+        self.__width = np.maximum(self.__width, [len(x) for x in data])
+        self.__rows.append(data)
+
+    def print(self):
+        pattern = '  '.join(['{{:<{0}}}'.format(w) for w in self.__width])
+        header = pattern.format(*self.columns)
+        print(header)
+        print('-'*len(header))
+        for row in self.__rows:
+            print(pattern.format(*row))
+
+
+
+
+

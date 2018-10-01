@@ -1,8 +1,13 @@
 import numpy as np
 from sklearn import datasets
 
-from dtlearn import regress, cluster, instance
+from dtlearn import regress, cluster
 from dtlearn.bayes import naive
+from dtlearn.instance import knn
+from dtlearn.utils import Table
+
+
+table = Table('model', 'accuracy')
 
 
 def test_gaussian():
@@ -15,20 +20,33 @@ def test_gaussian():
     h = model.predict(X)
 
     accuracy = model.score(y, h)
-    print('gaussian:', accuracy)
+    table.add('gaussian', accuracy)
 
 
 def test_bernoulli():
-    chess = np.load('data/chess.npy')
-    X = chess[:, :-1]
-    y = chess[:, -1]
+    chess = np.load('data/chess.npz')
+    X = chess['data']
+    y = chess['target']
 
     model = naive.Bernoulli()
     model.train(X, y)
     h = model.predict(X)
 
     accuracy = model.score(y, h)
-    print('bernoulli:', accuracy)
+    table.add('bernoulli', accuracy)
+
+
+def test_multinomial():
+    balance = np.load('data/balance.npz')
+    X = balance['data']
+    y = balance['target']
+
+    model = naive.Multinomial()
+    model.train(X, y)
+    h = model.predict(X)
+
+    accuracy = model.score(y, h)
+    table.add('multinomial', accuracy)
 
 
 def test_linear():
@@ -41,7 +59,7 @@ def test_linear():
     h = model.predict(X)
 
     accuracy = model.score(y, h)
-    print('linear:', accuracy)
+    table.add('linear', accuracy)
 
 
 def test_logistic():
@@ -54,7 +72,7 @@ def test_logistic():
     h = model.predict(X)
 
     accuracy = model.score(y, h)
-    print('logistic:', accuracy)
+    table.add('logistic', accuracy)
 
 
 def test_kmeans():
@@ -67,7 +85,7 @@ def test_kmeans():
     h = model.predict(X)
 
     accuracy = model.score(y, h)
-    print('kmeans:', accuracy)
+    table.add('kmeans', accuracy)
 
 
 def test_knn_classifier():
@@ -75,12 +93,12 @@ def test_knn_classifier():
     X = iris.data
     y = iris.target
 
-    model = instance.KNN('classifier')
+    model = knn.Classifier()
     model.train(X, y)
     h = model.predict(X, 3)
 
     accuracy = model.score(y, h)
-    print('knn classifier:', accuracy)
+    table.add('knn classifier', accuracy)
 
 
 def test_knn_regressor():
@@ -88,19 +106,21 @@ def test_knn_regressor():
     X = boston.data
     y = boston.target
 
-    model = instance.KNN('regressor')
+    model = knn.Regressor()
     model.train(X, y)
     h = model.predict(X, 3)
 
     accuracy = model.score(y, h)
-    print('knn regressor:', accuracy)
+    table.add('knn regressor', accuracy)
 
 
 if __name__ == '__main__':
     test_gaussian()
     test_bernoulli()
+    test_multinomial()
     test_linear()
     test_logistic()
     test_kmeans()
     test_knn_classifier()
     test_knn_regressor()
+    table.print()

@@ -30,7 +30,7 @@ class Gaussian(Model):
         groups = [X[y == label] for label in self.labels]
         self.u = np.array([np.mean(group, axis=0) for group in groups])
         self.v = np.array([np.var(group, axis=0) for group in groups])
-        self.p = np.array([len(group) / len(y) for group in groups])
+        self.p = np.array([len(group) for group in groups]) / len(y)
 
     def predict(self, X):
         """
@@ -78,8 +78,8 @@ class Bernoulli(Model):
         """
         self.labels = np.unique(y)
         groups = [X[y == label] for label in self.labels]
-        self.priors = np.array([np.sum(group, axis=0) / len(group) for group in groups])
-        self.p = np.array([len(group) / len(y) for group in groups])
+        self.priors = np.array([np.mean(group, axis=0) for group in groups])
+        self.p = np.array([len(group) for group in groups]) / len(y)
 
     def predict(self, X):
         """
@@ -91,6 +91,59 @@ class Bernoulli(Model):
         priors = self.priors[np.newaxis]
 
         prob = X * (2*priors-1) + (1-priors)
+        prob = np.prod(prob, axis=2) * self.p
+        return self.labels[np.argmax(prob, axis=1)]
+
+    def score(self, y, h):
+        """
+        calculates the number of correct predictions over total predictions
+        """
+        return fraction_correct(y, h)
+
+
+class Multinomial(Model):
+    def __init__(self):
+        """
+        multinomial naive bayes model
+
+        :type labels: np.ndarray
+        :desc labels: possible classes [k x 1]
+
+        :type priors: np.ndarray
+        :desc priors: appearance rate of feature per class [k x n x t]
+
+        :type p: np.ndarray
+        :desc p: appearance rate of each class [k x 1]
+        """
+
+    def train(self, X, y):
+        """
+        find the appearance rate of each class and each feature given the class
+        """
+        self.categories, encode = np.unique(X, return_inverse=True)
+        encode = encode.reshape(X.shape)
+        X = np.eye(len(self.categories))[encode]
+
+        self.labels = np.unique(y)
+        groups = [X[y == label] for label in self.labels]
+
+        self.priors = np.array([np.mean(group, axis=0) for group in groups])
+        self.p = np.array([len(group) for group in groups]) / len(y)
+
+    def predict(self, X):
+        """
+        given the appearance rate of a feature for each class and
+        the appearance rate of each class predict the most probable
+        class for each sample in X
+        """
+        mapping = {c: i for i,c in enumerate(self.categories)}
+        encode = np.vectorize(mapping.get)(X)
+        X = np.eye(len(self.categories))[encode]
+
+        X = X[:, np.newaxis]
+        priors = self.priors[np.newaxis]
+
+        prob = np.sum(X * priors, axis=3)
         prob = np.prod(prob, axis=2) * self.p
         return self.labels[np.argmax(prob, axis=1)]
 

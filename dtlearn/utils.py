@@ -27,6 +27,16 @@ def sigmoid(x):
     return 1.0 / (1.0 + np.exp(-x))
 
 
+def desigmoid(x):
+    """
+    find the derivative of sigmoid of x
+
+    to see the function look up 'sigmoid function' in wikipedia
+    """
+    x = sigmoid(x)
+    return x * (1.0 - x)
+
+
 def fraction_correct(y, h):
     """
     calculates the fraction of correct predictions
@@ -77,8 +87,3 @@ class Table:
         print('-'*len(header))
         for row in self.__rows:
             print(pattern.format(*row))
-
-
-
-
-

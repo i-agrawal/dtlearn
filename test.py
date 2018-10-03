@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn import datasets
 
-from dtlearn import regress, cluster
+from dtlearn import regress, cluster, nn
 from dtlearn.bayes import naive
 from dtlearn.instance import knn
 from dtlearn.utils import Table
@@ -114,6 +114,19 @@ def test_knn_regressor():
     table.add('knn regressor', accuracy)
 
 
+def test_nn_classifier():
+    iris = datasets.load_iris()
+    X = iris.data
+    y = iris.target
+
+    model = nn.Classifier([5])
+    model.train(X, y)
+    h = model.predict(X)
+
+    accuracy = model.score(y, h)
+    table.add('nn classifier', accuracy)
+
+
 if __name__ == '__main__':
     test_gaussian()
     test_bernoulli()
@@ -123,4 +136,5 @@ if __name__ == '__main__':
     test_kmeans()
     test_knn_classifier()
     test_knn_regressor()
+    test_nn_classifier()
     table.print()

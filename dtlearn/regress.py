@@ -44,7 +44,7 @@ class Logistic(Model):
         :desc theta: learned weight matrix [n+1 x k]
         """
 
-    def train(self, X, y, epochs=10000, eta=0.01, exit=0.00001, seed=34):
+    def train(self, X, y, epochs=10000, eta=0.1, exit=0.00001, seed=34):
         """
         calculate weights that best solve sigmoid(a1 * x1 + ... + an * xn + b) == k
         """

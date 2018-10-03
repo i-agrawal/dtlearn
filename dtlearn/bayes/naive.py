@@ -136,7 +136,7 @@ class Multinomial(Model):
         the appearance rate of each class predict the most probable
         class for each sample in X
         """
-        mapping = {c: i for i,c in enumerate(self.categories)}
+        mapping = {c: i for i, c in enumerate(self.categories)}
         encode = np.vectorize(mapping.get)(X)
         X = np.eye(len(self.categories))[encode]
 

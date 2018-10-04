@@ -9,6 +9,15 @@ def add_bias(x):
     return np.append(x, np.ones((m, 1)), axis=1)
 
 
+def two_dims(y):
+    """
+    make sure y has two dimensions
+    """
+    if y.ndim == 1:
+        y = y[:, np.newaxis]
+    return y
+
+
 def normal_pdf(x, u, v):
     """
     find the probability of a value (x) given the mean (u) and variance (v)

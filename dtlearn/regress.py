@@ -19,7 +19,7 @@ class Linear(Model):
         calculate weights that best solve y = a1 * x1 + ... + an * xn + b
         """
         X = add_bias(X)
-        self.theta = np.linalg.inv(X.T.dot(X)).dot(X.T).dot(y)
+        self.theta = np.linalg.pinv(X.T.dot(X)).dot(X.T).dot(y)
 
     def predict(self, X):
         """

@@ -3,7 +3,7 @@ import abc
 import numpy as np
 
 from . import Model
-from .utils import add_bias, sigmoid
+from .utils import sigmoid, two_dims
 from .utils import fraction_correct, coef_determination
 
 
@@ -124,3 +124,46 @@ class Classifier(NeuralNetwork):
         calculates the number of correct predictions over total predictions
         """
         return fraction_correct(y, h)
+
+
+class Regressor(NeuralNetwork):
+    """
+    regressor neural network model
+
+    :type theta: np.ndarray
+    :desc theta: learned weight matrix [n+1 x k]
+    """
+
+    def train(self, X, y, epochs=1000, eta=0.00001, seed=34):
+        """
+        train the classifier network after one hot
+        encoding the target values
+        """
+        y = two_dims(y)
+
+        super().train(X, y, epochs, eta, seed)
+
+    def activate(self, x):
+        """
+        the regressor network's activation is linear
+        """
+        return x
+
+    def deactivate(self, x):
+        """
+        the derivative of x is 1
+        """
+        return 1
+
+    def predict(self, X):
+        """
+        use trained weights to predict the class of each sample
+        """
+        h, _, _ = self.forward(X, self.thetas, self.biases)
+        return h
+
+    def score(self, y, h):
+        """
+        calculates the number of correct predictions over total predictions
+        """
+        return coef_determination(y, h)

@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn import datasets
 
-from dtlearn import regress, cluster, nn
+from dtlearn import regress, cluster, nn, svm
 from dtlearn.bayes import naive
 from dtlearn.instance import knn
 from dtlearn.utils import Table
@@ -60,6 +60,19 @@ def test_linear():
 
     accuracy = model.score(y, h)
     table.add('linear', accuracy)
+
+
+def test_quadratic():
+    boston = datasets.load_boston()
+    X = np.hstack((boston.data, boston.data**2))
+    y = boston.target
+
+    model = regress.Linear()
+    model.train(X, y)
+    h = model.predict(X)
+
+    accuracy = model.score(y, h)
+    table.add('quadratic', accuracy)
 
 
 def test_logistic():
@@ -127,14 +140,29 @@ def test_nn_classifier():
     table.add('nn classifier', accuracy)
 
 
+def test_svm_classifier():
+    iris = datasets.load_iris()
+    X = iris.data
+    y = iris.target
+
+    model = svm.Classifier()
+    model.train(X, y > 0)
+    h = model.predict(X)
+
+    accuracy = model.score(y, h)
+    table.add('svm classifier', accuracy)
+
+
 if __name__ == '__main__':
     test_gaussian()
     test_bernoulli()
     test_multinomial()
     test_linear()
+    test_quadratic()
     test_logistic()
     test_kmeans()
     test_knn_classifier()
     test_knn_regressor()
     test_nn_classifier()
+    test_svm_classifier()
     table.print()

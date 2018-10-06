@@ -143,10 +143,10 @@ def test_nn_classifier():
 def test_svm_classifier():
     iris = datasets.load_iris()
     X = iris.data
-    y = iris.target
+    y = iris.target > 0
 
     model = svm.Classifier()
-    model.train(X, y > 0)
+    model.train(X, y)
     h = model.predict(X)
 
     accuracy = model.score(y, h)

@@ -26,7 +26,8 @@ class Classifier(Model):
         np.random.seed(seed)
         theta = np.random.rand(n+1, 1)
         for _ in range(epochs):
-            grad = eta * (-np.dot(X.T, y) + theta) / m
+            h = y * np.dot(X, theta)
+            grad = eta * (-np.dot(X.T, y * (h < 1))) / m
             theta -= grad
             if np.sum(grad**2) < exit:
                 break
@@ -37,7 +38,8 @@ class Classifier(Model):
         use trained weights to predict the class of each sample
         """
         X = add_bias(X)
-        return np.dot(X, self.theta) > 0
+        h = np.dot(X, self.theta) > 0
+        return np.ravel(h)
 
     def score(self, y, h):
         """

@@ -1,7 +1,9 @@
+from collections import deque
+
 import numpy as np
-from scipy.optimize import linear_sum_assignment
 
 from . import Model
+from .utils import cluster_intersect
 
 
 class KMeans(Model):
@@ -56,12 +58,69 @@ class KMeans(Model):
 
     def score(self, y, h):
         """
-        assign each centroid to a label and find the percentage correct
+        assign each cluster to most intersecting label and find the percentage correct
         """
-        labels, counts = np.unique(y, return_counts=True)
-        guesses = [y[h == i] for i in range(self.k)]
+        return cluster_intersect(y, h)
 
-        matches = np.array([[np.sum(guess == label) for label in labels] for guess in guesses])
-        master = matches / counts[:, np.newaxis]
-        rows, cols = linear_sum_assignment(-master)
-        return np.sum([master[r, c] * len(guesses[r]) for r, c in zip(rows, cols)]) / len(y)
+
+class DBSCAN(Model):
+    def __init__(self):
+        """
+        DBSCAN algorithm
+        """
+
+    def train(self):
+        raise Exception('DBSCAN does not need training')
+
+    def predict(self, X, min_pts, eps):
+        """
+        a core point is a point with at least min_pts within eps distance of it
+        for each core point not in a cluster, start a cluster with the point
+        for each point in the cluster add its neighbors if it is a core point
+            keep doing that until no more new points can be added
+
+        :type min_pts: int
+        :desc min_pts: minimum number of neighbors to be a core point
+
+        :type eps: float
+        :desc eps: distance for two points to be within the same clusters
+        """
+        undefined = -2
+        noise = -1
+        cluster = 0
+
+        m, n = X.shape
+        dists = X[:, np.newaxis] - X[np.newaxis]
+        dists = np.sum(dists**2, axis=2)
+
+        neighbors = [set() for _ in range(m)]
+        rows, cols = np.where(dists <= eps)
+        for i, j in zip(rows, cols):
+            neighbors[i].add(j)
+
+        labels = [undefined] * m
+        for i in range(m):
+            if labels[i] != undefined or len(neighbors[i]) < min_pts:
+                continue
+
+            searched = {i}
+            search = deque([i])
+            while len(search) > 0:
+                pt = search.popleft()
+                if labels[pt] >= 0:
+                    continue
+
+                labels[pt] = cluster
+                if len(neighbors[pt]) >= min_pts:
+                    for pt in neighbors[pt]:
+                        if pt not in searched:
+                            search.append(pt)
+                            searched.add(pt)
+            cluster += 1
+        return labels
+
+    def score(self, y, h):
+        """
+        assign each cluster to most intersecting label and find the percentage correct
+        """
+        return cluster_intersect(y, h)

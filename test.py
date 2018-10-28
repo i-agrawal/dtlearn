@@ -153,6 +153,18 @@ def test_svm_classifier():
     table.add('svm classifier', accuracy)
 
 
+def test_dbscan():
+    iris = datasets.load_iris()
+    X = iris.data
+    y = iris.target > 0
+
+    model = cluster.DBSCAN()
+    h = model.predict(X, 10, 2.0)
+
+    accuracy = model.score(y, h)
+    table.add('dbscan', accuracy)
+
+
 if __name__ == '__main__':
     test_gaussian()
     test_bernoulli()
@@ -165,4 +177,5 @@ if __name__ == '__main__':
     test_knn_regressor()
     test_nn_classifier()
     test_svm_classifier()
+    test_dbscan()
     table.print()

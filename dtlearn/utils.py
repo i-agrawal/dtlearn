@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.optimize import linear_sum_assignment
 
 
 def add_bias(x):
@@ -62,6 +63,37 @@ def coef_determination(y, h):
     dist = np.sum((y - h)**2)
     variance = np.sum((y - np.mean(y))**2)
     return 1.0 - dist / variance
+
+
+def setted(x):
+    """
+    find the unique values in x with a set of indices for each unique value
+    """
+    values = {}
+    for i, v in enumerate(x):
+        if v not in values:
+            values[v] = set()
+        values[v].add(i)
+    return list(values.values())
+
+
+def cluster_intersect(y, h):
+    """
+    assign each cluster to most intersecting label and find the percentage correct
+    """
+    labels = setted(y)
+    guesses = setted(h)
+
+    m, n = len(labels), len(guesses)
+    intersect = np.empty((m, n))
+    union = np.empty((m, n))
+    for i, a in enumerate(labels):
+        for j, b in enumerate(guesses):
+            intersect[i, j] = len(a & b)
+            union[i, j] = len(a | b)
+
+    rows, cols = linear_sum_assignment(-(intersect / union))
+    return np.sum([intersect[r, c] for r, c in zip(rows, cols)]) / len(y)
 
 
 class Table:

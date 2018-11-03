@@ -13,7 +13,7 @@ class Classifier(Model):
         :desc theta: learned weight matrix [n x k]
         """
 
-    def train(self, X, y, eta, epochs=100):
+    def train(self, X, y, eta, epochs=10):
         """
         for each sample in x find the closest weight and update it
 
@@ -22,7 +22,6 @@ class Classifier(Model):
         """
         m, n = X.shape
         self.labels, encode = np.unique(y, return_inverse=True)
-        k = len(self.labels)
 
         theta = np.array([X[y == label][0] for label in self.labels])
         for i in range(epochs):
@@ -42,7 +41,8 @@ class Classifier(Model):
         use trained weights to predict the class of each sample
         """
         dists = X[:, np.newaxis] - self.theta[np.newaxis]
-        return np.argmin(np.sum(dists**2, axis=2), axis=1)
+        dists = np.sum(dists**2, axis=2)
+        return self.labels[np.argmin(dists, axis=1)]
 
     def score(self, y, h):
         """

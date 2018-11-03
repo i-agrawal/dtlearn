@@ -2,16 +2,21 @@ import numpy as np
 
 from . import Model
 from .utils import fraction_correct
+from .distance import sqeuclidean
 
 
 class Classifier(Model):
-    def __init__(self):
+    def __init__(self, dist=sqeuclidean):
         """
         learning vector quantization classifier model
 
         :type theta: np.ndarray
         :desc theta: learned weight matrix [n x k]
+
+        :type dist: fct(np.ndarray, np.ndarray)
+        :desc dist: the distance metric used
         """
+        self.dist = dist
 
     def train(self, X, y, eta, epochs=10):
         """
@@ -27,8 +32,7 @@ class Classifier(Model):
         for i in range(epochs):
             eta_ = eta * (1.0 - i / epochs)
             for x, label in zip(X, encode):
-                dist = np.sum((theta - x)**2, axis=1)
-                ind = np.argmin(dist)
+                ind = np.argmin(self.dist(theta, x))
                 change = eta_ * (x - theta[ind])
                 if ind == label:
                     theta[ind] += change

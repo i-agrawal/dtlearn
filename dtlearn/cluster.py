@@ -4,10 +4,11 @@ import numpy as np
 
 from . import Model
 from .utils import cluster_intersect
+from .distance import sqeuclidean
 
 
 class KMeans(Model):
-    def __init__(self, k):
+    def __init__(self, k, dist=sqeuclidean):
         """
         k means clustering model
 
@@ -16,8 +17,12 @@ class KMeans(Model):
 
         :type centroids: np.ndarray
         :desc centroids: the center for each cluster [k x n]
+
+        :type dist: fct(np.ndarray, np.ndarray)
+        :desc dist: the distance metric used
         """
         self.k = k
+        self.dist = dist
 
     def kmeanspp(self, X):
         """
@@ -27,8 +32,7 @@ class KMeans(Model):
         """
         centroids = X[np.random.randint(X.shape[0])]
         for i in range(1, self.k):
-            dists = X[:, np.newaxis] - centroids[np.newaxis]
-            dists = np.min(np.sum(dists**2, axis=2), axis=1)
+            dists = np.min(self.dist(X, centroids), axis=1)
             prob = np.cumsum(dists / np.sum(dists))
             chosen = np.searchsorted(prob > np.random.uniform(), True)
             centroids = np.vstack((centroids, X[chosen]))
@@ -43,8 +47,7 @@ class KMeans(Model):
         centroids = change - 1
         while np.any(centroids != change):
             centroids = change
-            dists = X[:, np.newaxis] - centroids[np.newaxis]
-            elect = np.argmin(np.sum(dists**2, axis=2), axis=1)
+            elect = np.argmin(self.dist(X, centroids), axis=1)
             change = np.array([np.mean(X[elect == i], axis=0) for i in range(self.k)])
         self.centroids = centroids
 
@@ -52,9 +55,7 @@ class KMeans(Model):
         """
         assign each sample in X to it's closest centroid
         """
-        dists = X[:, np.newaxis] - self.centroids[np.newaxis]
-        elect = np.argmin(np.sum(dists**2, axis=2), axis=1)
-        return elect
+        return np.argmin(self.dist(X, self.centroids), axis=1)
 
     def score(self, y, h):
         """
@@ -64,6 +65,8 @@ class KMeans(Model):
 
 
 class DBSCAN(Model):
+    UNDEFINED = -1
+
     def __init__(self):
         """
         DBSCAN algorithm
@@ -72,7 +75,7 @@ class DBSCAN(Model):
     def train(self):
         raise Exception('DBSCAN does not need training')
 
-    def predict(self, X, min_pts, eps):
+    def predict(self, X, min_pts, eps, dist=sqeuclidean):
         """
         a core point is a point with at least min_pts within eps distance of it
         for each core point not in a cluster, start a cluster with the point
@@ -84,36 +87,34 @@ class DBSCAN(Model):
 
         :type eps: float
         :desc eps: distance for two points to be within the same clusters
+
+        :type dist: fct(np.ndarray, np.ndarray)
+        :desc dist: the distance metric used
         """
         m, n = X.shape
-        dists = X[:, np.newaxis] - X[np.newaxis]
-        dists = np.sum(dists**2, axis=2)
 
         neighbors = [set() for _ in range(m)]
-        rows, cols = np.where(dists <= eps)
+        rows, cols = np.where(dist(X, X) <= eps)
         for i, j in zip(rows, cols):
             neighbors[i].add(j)
 
         cluster = 0
-        undefined = -1
-        labels = [undefined] * m
+        labels = [DBSCAN.UNDEFINED] * m
         for i in range(m):
-            if labels[i] != undefined or len(neighbors[i]) < min_pts:
+            if labels[i] != DBSCAN.UNDEFINED and len(neighbors[i]) < min_pts:
                 continue
 
-            searched = {i}
+            searched = set([i])
             searching = deque([i])
             while searching:
                 pt = searching.popleft()
-                if labels[pt] != undefined:
-                    continue
-
-                labels[pt] = cluster
-                if len(neighbors[pt]) >= min_pts:
-                    for i in neighbors[pt]:
-                        if i not in searched:
-                            searching.append(i)
-                            searched.add(i)
+                if labels[pt] == DBSCAN.UNDEFINED:
+                    labels[pt] = cluster
+                    if len(neighbors[pt]) >= min_pts:
+                        for x in neighbors[pt]:
+                            if x not in searched:
+                                searching.append(x)
+                                searched.add(x)
             cluster += 1
         return np.array(labels)
 

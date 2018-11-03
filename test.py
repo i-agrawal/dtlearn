@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn import datasets
 
-from dtlearn import regress, cluster, nn, svm
+from dtlearn import regress, cluster, nn, svm, lvq
 from dtlearn.bayes import naive
 from dtlearn.instance import knn
 from dtlearn.utils import Table
@@ -165,6 +165,19 @@ def test_dbscan():
     table.add('dbscan', accuracy)
 
 
+def test_lvq():
+    iris = datasets.load_iris()
+    X = iris.data
+    y = iris.target
+
+    model = lvq.Classifier()
+    model.train(X, y, 0.1)
+    h = model.predict(X)
+
+    accuracy = model.score(y, h)
+    table.add('lvq classifier', accuracy)
+
+
 if __name__ == '__main__':
     test_gaussian()
     test_bernoulli()
@@ -178,4 +191,5 @@ if __name__ == '__main__':
     test_nn_classifier()
     test_svm_classifier()
     test_dbscan()
+    test_lvq()
     table.print()

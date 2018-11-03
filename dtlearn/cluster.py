@@ -85,10 +85,6 @@ class DBSCAN(Model):
         :type eps: float
         :desc eps: distance for two points to be within the same clusters
         """
-        undefined = -2
-        noise = -1
-        cluster = 0
-
         m, n = X.shape
         dists = X[:, np.newaxis] - X[np.newaxis]
         dists = np.sum(dists**2, axis=2)
@@ -98,26 +94,28 @@ class DBSCAN(Model):
         for i, j in zip(rows, cols):
             neighbors[i].add(j)
 
+        cluster = 0
+        undefined = -1
         labels = [undefined] * m
         for i in range(m):
             if labels[i] != undefined or len(neighbors[i]) < min_pts:
                 continue
 
             searched = {i}
-            search = deque([i])
-            while len(search) > 0:
-                pt = search.popleft()
-                if labels[pt] >= 0:
+            searching = deque([i])
+            while searching:
+                pt = searching.popleft()
+                if labels[pt] != undefined:
                     continue
 
                 labels[pt] = cluster
                 if len(neighbors[pt]) >= min_pts:
-                    for pt in neighbors[pt]:
-                        if pt not in searched:
-                            search.append(pt)
-                            searched.add(pt)
+                    for i in neighbors[pt]:
+                        if i not in searched:
+                            searching.append(i)
+                            searched.add(i)
             cluster += 1
-        return labels
+        return np.array(labels)
 
     def score(self, y, h):
         """

@@ -101,7 +101,7 @@ class DBSCAN(Model):
         cluster = 0
         labels = [DBSCAN.UNDEFINED] * m
         for i in range(m):
-            if labels[i] != DBSCAN.UNDEFINED and len(neighbors[i]) < min_pts:
+            if labels[i] != DBSCAN.UNDEFINED or len(neighbors[i]) < min_pts:
                 continue
 
             searched = set([i])

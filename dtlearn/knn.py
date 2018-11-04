@@ -1,8 +1,8 @@
 import numpy as np
 from scipy import stats
 
-from .. import Model
-from ..utils import fraction_correct, coef_determination
+from . import Model
+from .utils import fraction_correct, coef_determination
 
 
 class Classifier(Model):

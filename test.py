@@ -1,9 +1,8 @@
 import numpy as np
 from sklearn import datasets
 
-from dtlearn import regress, cluster, nn, svm, lvq
+from dtlearn import regress, cluster, nn, svm, lvq, knn
 from dtlearn.bayes import naive
-from dtlearn.instance import knn
 from dtlearn.utils import Table
 
 

@@ -1,44 +1,27 @@
-import abc
+import numpy as np
+
+from abc import ABCMeta, abstractmethod
+
+from .utils import sqsum
 
 
-class Model(metaclass=abc.ABCMeta):
-    def __init__(self):
-        """
-        model initialization
-        """
+class Model(metaclass=ABCMeta):
 
-    @abc.abstractmethod
-    def train(self, X, y):
-        """
-        uses training data to calculate something
-        meaningful in order to predict
+    @abstractmethod
+    def train(self, x, y):
+        """trains the model"""
 
-        :type X: np.ndarray
-        :desc X: training data features [m x n]
+    @abstractmethod
+    def predict(self, x):
+        """model's prediction"""
 
-        :type y: np.ndarray
-        :desc y: training data targets [n x k]
-        """
 
-    @abc.abstractmethod
-    def predict(self, X):
-        """
-        using steps from train predict the outcome
-        of the given features
+class Distanced(Model):
+    def __init__(self, dist=None):
+        self.dist = dist or self.__distance
 
-        :type X: np.ndarray
-        :desc X: testing data [m x n]
-        """
-
-    @abc.abstractmethod
-    def score(self, y, h):
-        """
-        given the actual and predicted calculate a
-        meaningful score of how well the predicted did
-
-        :type y: np.ndarray
-        :desc y: actual results [n x k]
-
-        :type h: np.ndarray
-        :desc h: predicted results [n x k]
-        """
+    @staticmethod
+    def __distance(a, b):
+        diff = a[:, np.newaxis] - b[np.newaxis]
+        axis = tuple(range(diff.ndim))[2:]
+        return sqsum(diff, axis=axis)

@@ -1,194 +1,158 @@
 import numpy as np
 from sklearn import datasets
 
-from dtlearn import regress, cluster, nn, svm, lvq, knn
-from dtlearn.bayes import naive
-from dtlearn.utils import Table
+from dtlearn import regress, cluster, other, nbayes, utils
 
 
-table = Table('model', 'accuracy')
-
-
-def test_gaussian():
-    iris = datasets.load_iris()
-    X = iris.data
-    y = iris.target
-
-    model = naive.Gaussian()
-    model.train(X, y)
-    h = model.predict(X)
-
-    accuracy = model.score(y, h)
-    table.add('gaussian', accuracy)
-
-
-def test_bernoulli():
-    chess = np.load('data/chess.npz')
-    X = chess['data']
-    y = chess['target']
-
-    model = naive.Bernoulli()
-    model.train(X, y)
-    h = model.predict(X)
-
-    accuracy = model.score(y, h)
-    table.add('bernoulli', accuracy)
-
-
-def test_multinomial():
-    balance = np.load('data/balance.npz')
-    X = balance['data']
-    y = balance['target']
-
-    model = naive.Multinomial()
-    model.train(X, y)
-    h = model.predict(X)
-
-    accuracy = model.score(y, h)
-    table.add('multinomial', accuracy)
+iris = datasets.load_iris()
+boston = datasets.load_boston()
+linnerud = datasets.load_linnerud()
 
 
 def test_linear():
-    boston = datasets.load_boston()
-    X = boston.data
-    y = boston.target
+    X = linnerud.data
+    y = linnerud.target
 
     model = regress.Linear()
     model.train(X, y)
     h = model.predict(X)
 
-    accuracy = model.score(y, h)
-    table.add('linear', accuracy)
-
-
-def test_quadratic():
-    boston = datasets.load_boston()
-    X = np.hstack((boston.data, boston.data**2))
-    y = boston.target
-
-    model = regress.Linear()
-    model.train(X, y)
-    h = model.predict(X)
-
-    accuracy = model.score(y, h)
-    table.add('quadratic', accuracy)
+    accuracy = utils.correlation(y, h)
+    print(model.__class__.__name__, accuracy)
 
 
 def test_logistic():
-    iris = datasets.load_iris()
     X = iris.data
     y = iris.target
+    one_hot = np.eye(3)[y]
 
     model = regress.Logistic()
-    model.train(X, y)
+    model.train(X, one_hot)
     h = model.predict(X)
 
-    accuracy = model.score(y, h)
-    table.add('logistic', accuracy)
+    accuracy = np.sum(y == h) / y.shape[0]
+    print(model.__class__.__name__, accuracy)
 
 
 def test_kmeans():
-    iris = datasets.load_iris()
     X = iris.data
     y = iris.target
 
-    model = cluster.KMeans(3)
-    model.train(X)
+    model = cluster.KMeans()
+    model.train(X, 3)
     h = model.predict(X)
 
-    accuracy = model.score(y, h)
-    table.add('kmeans', accuracy)
-
-
-def test_knn_classifier():
-    iris = datasets.load_iris()
-    X = iris.data
-    y = iris.target
-
-    model = knn.Classifier()
-    model.train(X, y)
-    h = model.predict(X, 3)
-
-    accuracy = model.score(y, h)
-    table.add('knn classifier', accuracy)
-
-
-def test_knn_regressor():
-    boston = datasets.load_boston()
-    X = boston.data
-    y = boston.target
-
-    model = knn.Regressor()
-    model.train(X, y)
-    h = model.predict(X, 3)
-
-    accuracy = model.score(y, h)
-    table.add('knn regressor', accuracy)
-
-
-def test_nn_classifier():
-    iris = datasets.load_iris()
-    X = iris.data
-    y = iris.target
-
-    model = nn.Classifier([5])
-    model.train(X, y)
-    h = model.predict(X)
-
-    accuracy = model.score(y, h)
-    table.add('nn classifier', accuracy)
-
-
-def test_svm_classifier():
-    iris = datasets.load_iris()
-    X = iris.data
-    y = iris.target > 0
-
-    model = svm.Classifier()
-    model.train(X, y)
-    h = model.predict(X)
-
-    accuracy = model.score(y, h)
-    table.add('svm classifier', accuracy)
+    accuracy = utils.purity(y, h)
+    print(model.__class__.__name__, accuracy)
 
 
 def test_dbscan():
-    iris = datasets.load_iris()
     X = iris.data
     y = iris.target > 0
 
     model = cluster.DBSCAN()
-    h = model.predict(X, 10, 2.0)
+    h = model.predict(X, 10, 0.09)
 
-    accuracy = model.score(y, h)
-    table.add('dbscan', accuracy)
+    accuracy = utils.purity(y, h)
+    print(model.__class__.__name__, accuracy)
 
 
-def test_lvq():
-    iris = datasets.load_iris()
+def test_knn_classifier():
     X = iris.data
     y = iris.target
 
-    model = lvq.Classifier()
-    model.train(X, y, 0.1)
+    model = other.KNN()
+    model.train(X, y)
+    h = model.predict(X, 10)
+
+    accuracy = utils.purity(y, h)
+    print(model.__class__.__name__, accuracy)
+
+
+def test_knn_regressor():
+    X = linnerud.data
+    y = linnerud.target
+
+    model = other.KNN()
+    model.train(X, y)
+    h = model.predict(X, 3, mode='regression')
+
+    accuracy = utils.correlation(y, h)
+    print(model.__class__.__name__, accuracy)
+
+
+def test_lvq():
+    X = iris.data
+    y = iris.target
+
+    model = other.LVQ()
+    model.train(X, y)
     h = model.predict(X)
 
-    accuracy = model.score(y, h)
-    table.add('lvq classifier', accuracy)
+    accuracy = np.sum(y == h) / y.shape[0]
+    print(model.__class__.__name__, accuracy)
+
+
+def test_gaussian():
+    X = iris.data
+    y = iris.target
+
+    model = nbayes.Gaussian()
+    model.train(X, y)
+    h = model.predict(X)
+
+    accuracy = np.sum(y == h) / y.shape[0]
+    print(model.__class__.__name__, accuracy)
+
+
+def test_bernoulli():
+    X = iris.data
+    y = iris.target
+    X = X > np.mean(X, axis=0)
+
+    model = nbayes.Bernoulli()
+    model.train(X, y)
+    h = model.predict(X)
+
+    accuracy = np.sum(y == h) / y.shape[0]
+    print(model.__class__.__name__, accuracy)
+
+
+def test_multinomial():
+    X = iris.data
+    X = np.round((X - np.mean(X, axis=0)) / np.std(X, axis=0))
+    y = iris.target
+
+    model = nbayes.Multinomial()
+    model.train(X, y)
+    h = model.predict(X)
+
+    accuracy = np.sum(y == h) / y.shape[0]
+    print(model.__class__.__name__, accuracy)
+
+
+def test_svm():
+    X = iris.data
+    y = iris.target
+    y = 2 * (y > 0) - 1
+
+    model = other.SVM()
+    model.train(X, y)
+    h = model.predict(X)
+
+    accuracy = np.sum(y == h) / y.shape[0]
+    print(model.__class__.__name__, accuracy)
 
 
 if __name__ == '__main__':
+    test_linear()
+    test_logistic()
+    test_kmeans()
+    test_dbscan()
+    test_knn_classifier()
+    test_knn_regressor()
+    test_lvq()
     test_gaussian()
     test_bernoulli()
     test_multinomial()
-    test_linear()
-    test_quadratic()
-    test_logistic()
-    test_kmeans()
-    test_knn_classifier()
-    test_knn_regressor()
-    test_nn_classifier()
-    test_svm_classifier()
-    test_dbscan()
-    test_lvq()
-    table.print()
+    test_svm()

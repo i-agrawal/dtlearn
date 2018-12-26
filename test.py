@@ -144,6 +144,19 @@ def test_svm():
     print(model.__class__.__name__, accuracy)
 
 
+def test_mean_shift():
+    X = iris.data
+    y = iris.target > 0
+
+    model = cluster.MeanShift()
+    model.train(X, bandwidth=1)
+    h = model.predict(X)
+    print(h)
+
+    accuracy = utils.purity(y, h)
+    print(model.__class__.__name__, accuracy)
+
+
 if __name__ == '__main__':
     test_linear()
     test_logistic()
@@ -156,3 +169,4 @@ if __name__ == '__main__':
     test_bernoulli()
     test_multinomial()
     test_svm()
+    test_mean_shift()

@@ -10,7 +10,7 @@ class MeanShift(Distanced):
         while True:
             dist = self.dist(x, x)
             nextx = np.array([np.mean(x[d < bandwidth], axis=0) for d in dist])
-            if sqsum(x - nextx) < bandwidth:
+            if sqsum(x - nextx) < 1e-3:
                 break
             x = nextx
 

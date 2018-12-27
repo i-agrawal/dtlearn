@@ -151,7 +151,18 @@ def test_mean_shift():
     model = cluster.MeanShift()
     model.train(X, bandwidth=1)
     h = model.predict(X)
-    print(h)
+
+    accuracy = utils.purity(y, h)
+    print(model.__class__.__name__, accuracy)
+
+
+def test_fuzzy_cmeans():
+    X = iris.data
+    y = iris.target
+
+    model = cluster.FuzzyCMeans()
+    model.train(X, 3)
+    h = model.predict(X)
 
     accuracy = utils.purity(y, h)
     print(model.__class__.__name__, accuracy)
@@ -170,3 +181,4 @@ if __name__ == '__main__':
     test_multinomial()
     test_svm()
     test_mean_shift()
+    test_fuzzy_cmeans()

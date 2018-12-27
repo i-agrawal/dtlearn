@@ -1,6 +1,7 @@
 import numpy as np
 
 from .. import Distanced
+from ..utils import sqsum
 
 
 class KMeans(Distanced):
@@ -19,7 +20,7 @@ class KMeans(Distanced):
     def train(self, x, k):
         next_centers = self.kmeanspp(x, k)
         centroids = next_centers - 1
-        while np.any(centroids != next_centers):
+        while sqsum(centroids - next_centers) > 1e-3:
             centroids = next_centers
             closest = np.argmin(self.dist(x, centroids), axis=1)
             next_centers = np.array([np.mean(x[closest == i], axis=0) for i in range(k)])
